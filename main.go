@@ -4,7 +4,7 @@ import "net/http"
 
 func main() {
 	http.HandleFunc("/user", handleGetUserByID)
-	http.Listem
+	http.ListenAndServe(":3000", nil)
 }
 
 func handleGetUserByID(w http.ResponseWriter, r *http.Request) {
