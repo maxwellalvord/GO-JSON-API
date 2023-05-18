@@ -6,12 +6,22 @@ import (
 )
 
 type apiError struct {
-	err    string
-	status int
+	Err    string
+	Status int
+}
+
+type apiFunc func(http.ResponseWriter, *http.Request) error
+
+func makeHTTPHandler(f apiFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := f(w, r); err != nil {
+			writeJSON(w, http.StatusInternalServerError, apiError{Err: "internal server"})
+		}
+	}
 }
 
 func (e apiError) Error() string {
-	return e.err
+	return e.Err
 }
 
 func main() {
@@ -21,7 +31,7 @@ func main() {
 
 func handleGetUserByID(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodGet {
-		return writeJSON(w, http.StatusMethodNotAllowed, apiError{err: "invalid method", status: http.StatusMethodNotAllowed})
+		return writeJSON(w, http.StatusMethodNotAllowed, apiError{Err: "invalid method", Status: http.StatusMethodNotAllowed})
 
 	}
 }
