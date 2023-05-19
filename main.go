@@ -25,15 +25,20 @@ func (e apiError) Error() string {
 }
 
 func main() {
-	http.HandleFunc("/user", handleGetUserByID)
+	http.HandleFunc("/user", makeHTTPHandler(handleGetUserByID))
 	http.ListenAndServe(":3000", nil)
+}
+
+type User struct {
+	id int
 }
 
 func handleGetUserByID(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodGet {
-		return writeJSON(w, http.StatusMethodNotAllowed, apiError{Err: "invalid method", Status: http.StatusMethodNotAllowed})
-
+		return apiError{Err: "invalid method", Status: http.StatusMethodNotAllowed}
 	}
+
+	return writeJSON(w, http.StatusOK, User{})
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) error {
