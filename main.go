@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+var ErrUserInvalid = apiError{Err: "user not valid", Status: http.StatusForbidden}
+
 type apiError struct {
 	Err    string
 	Status int
@@ -34,12 +36,18 @@ func main() {
 }
 
 type User struct {
-	id int
+	id    int
+	Valid bool
 }
 
 func handleGetUserByID(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodGet {
 		return apiError{Err: "invalid method", Status: http.StatusMethodNotAllowed}
+	}
+	//example of custom error
+	user := User{}
+	if !user.Valid {
+		return ErrUserInvalid
 	}
 
 	return writeJSON(w, http.StatusOK, User{})
