@@ -10,18 +10,22 @@ type apiError struct {
 	Status int
 }
 
+func (e apiError) Error() string {
+	return e.Err
+}
+
 type apiFunc func(http.ResponseWriter, *http.Request) error
 
 func makeHTTPHandler(f apiFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := f(w, r); err != nil {
-			writeJSON(w, http.StatusInternalServerError, apiError{Err: "internal server"})
+			if e, ok := err.(apiError); ok { // this line checks of this error is of this type
+				writeJSON(w, e.Status, e)
+				return
+			}
+			writeJSON(w, http.StatusInternalServerError, apiError{Err: "internal server", Status: http.StatusInternalServerError})
 		}
 	}
-}
-
-func (e apiError) Error() string {
-	return e.Err
 }
 
 func main() {
